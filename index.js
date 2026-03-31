@@ -44,6 +44,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/beneficiarios', require('./routes/beneficiarios'));
+app.use('/api', require('./routes/api'));
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

@@ -99,11 +99,25 @@
       <% } else { %>
         <p style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 0.5rem;"><%= fuenteConfig[v.fuente].descripcion %></p>
 
-        <% if (urls[v.fuente]) { %>
-          <a href="<%= urls[v.fuente] %>" target="_blank" class="verif-link btn btn-sm btn-outline" onclick="window.open(this.href, '_blank', 'width=1000,height=700'); return false;">
-            Abrir <%= fuenteConfig[v.fuente].titulo %> en nueva ventana
-          </a>
-        <% } %>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+          <% if (urls[v.fuente]) { %>
+            <a href="<%= urls[v.fuente] %>" target="_blank" class="btn btn-sm btn-outline" onclick="window.open(this.href, '_blank', 'width=1000,height=700'); return false;">
+              Abrir <%= fuenteConfig[v.fuente].titulo %> (manual)
+            </a>
+          <% } %>
+
+          <% if (v.fuente === 'registraduria' || v.fuente === 'adres') { %>
+            <button type="button" class="btn btn-sm btn-primary" onclick="consultarAPI('<%= v.fuente %>', <%= beneficiario.id %>)" id="btn-api-<%= v.fuente %>">
+              Consultar via API (Apitude)
+            </button>
+          <% } %>
+
+          <% if (v.fuente === 'sisben') { %>
+            <span class="badge badge-pendiente" style="padding: 0.4rem 0.8rem;">Solo consulta manual (reCAPTCHA)</span>
+          <% } %>
+        </div>
+
+        <div id="api-result-<%= v.fuente %>" style="display: none;" class="alert" style="margin-bottom: 0.75rem;"></div>
 
         <div class="alert alert-info" style="white-space: pre-line; font-size: 0.85rem;">
           <strong>Instrucciones:</strong>
