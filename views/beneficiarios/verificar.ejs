@@ -1,0 +1,180 @@
+<%- include('../layout/header') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+  <h2>Verificacion: <%= beneficiario.primer_nombre %> <%= beneficiario.primer_apellido %></h2>
+  <div>
+    <a href="/beneficiarios/<%= beneficiario.id %>/editar" class="btn btn-sm btn-outline">Editar</a>
+    <a href="/beneficiarios" class="btn btn-sm btn-outline">Volver</a>
+  </div>
+</div>
+
+<!-- Datos del beneficiario -->
+<div class="card">
+  <h2>Datos del Beneficiario</h2>
+  <div class="info-grid">
+    <div class="info-item">
+      <span class="label">Tipo Documento</span>
+      <span class="value"><span class="badge badge-<%= beneficiario.tipo_documento %>"><%= beneficiario.tipo_documento %></span></span>
+    </div>
+    <div class="info-item">
+      <span class="label">Numero Documento</span>
+      <span class="value"><%= beneficiario.numero_documento %></span>
+    </div>
+    <div class="info-item">
+      <span class="label">Nombre Completo</span>
+      <span class="value"><%= beneficiario.primer_nombre %> <%= beneficiario.segundo_nombre || '' %> <%= beneficiario.primer_apellido %> <%= beneficiario.segundo_apellido || '' %></span>
+    </div>
+    <div class="info-item">
+      <span class="label">Fecha de Nacimiento</span>
+      <span class="value"><%= beneficiario.fecha_nacimiento || 'No registrada' %></span>
+    </div>
+    <div class="info-item">
+      <span class="label">Ubicacion</span>
+      <span class="value"><%= beneficiario.municipio || '-' %>, <%= beneficiario.departamento || '-' %></span>
+    </div>
+  </div>
+</div>
+
+<!-- Estado general de verificación -->
+<% const aplican = verificaciones.filter(v => v.estado !== 'no_aplica'); %>
+<% const completadas = aplican.filter(v => v.estado === 'verificado'); %>
+<% const pct = aplican.length > 0 ? Math.round((completadas.length / aplican.length) * 100) : 0; %>
+
+<div class="card">
+  <h2>Progreso de Verificacion Triple - <%= completadas.length %>/<%= aplican.length %> completadas (<%= pct %>%)</h2>
+  <div class="progress-bar" style="height: 12px;">
+    <div class="progress-fill" style="width: <%= pct %>%"></div>
+  </div>
+
+  <% if (beneficiario.tipo_documento === 'PPT') { %>
+    <div class="alert alert-warning" style="margin-top: 1rem;">
+      Beneficiario con <strong>PPT</strong>: La verificacion con Registraduria Nacional no aplica. Solo se verifican SISBEN y ADRES.
+    </div>
+  <% } %>
+</div>
+
+<!-- Paneles de verificación por fuente -->
+<% const fuenteConfig = {
+  registraduria: {
+    titulo: 'Registraduria Nacional',
+    descripcion: 'Consulta del Registro Civil de Nacimiento',
+    instrucciones: '1. Abrir el enlace de consulta\n2. Ingresar el NUIP o serial del Registro Civil\n3. Verificar que los datos coincidan con los registrados\n4. Registrar el resultado abajo'
+  },
+  sisben: {
+    titulo: 'SISBEN IV',
+    descripcion: 'Consulta de grupo y puntaje SISBEN',
+    instrucciones: '1. Abrir el enlace de consulta\n2. Seleccionar tipo de documento e ingresar numero\n3. Verificar que aparezca el beneficiario\n4. Anotar grupo (A/B/C/D) y puntaje\n5. Registrar el resultado abajo'
+  },
+  adres: {
+    titulo: 'ADRES - Consulta EPS',
+    descripcion: 'Consulta de afiliacion al Sistema de Salud (BDUA)',
+    instrucciones: '1. Abrir el enlace de consulta\n2. Seleccionar tipo de documento e ingresar numero\n3. Verificar que aparezca el beneficiario y su EPS\n4. Anotar EPS, regimen y estado de afiliacion\n5. Registrar el resultado abajo'
+  }
+}; %>
+
+<% verificaciones.forEach(v => { %>
+  <div class="verif-panel">
+    <div class="verif-header">
+      <h3>
+        <span class="badge badge-<%= v.estado %>"><%= v.estado.replace('_', ' ').toUpperCase() %></span>
+        <%= fuenteConfig[v.fuente].titulo %>
+      </h3>
+      <% if (v.estado !== 'no_aplica') { %>
+        <span style="font-size: 0.8rem; color: var(--gray-500);">
+          <% if (v.fecha_verificacion && v.estado !== 'pendiente') { %>
+            Verificado: <%= v.fecha_verificacion %>
+          <% } %>
+        </span>
+      <% } %>
+    </div>
+
+    <div class="verif-body">
+      <% if (v.estado === 'no_aplica') { %>
+        <div class="alert alert-info">
+          Esta verificacion no aplica para documentos tipo <strong><%= beneficiario.tipo_documento %></strong>.
+          <% if (v.fuente === 'registraduria' && beneficiario.tipo_documento === 'PPT') { %>
+            Los titulares de PPT no tienen Registro Civil colombiano.
+          <% } %>
+        </div>
+      <% } else { %>
+        <p style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 0.5rem;"><%= fuenteConfig[v.fuente].descripcion %></p>
+
+        <% if (urls[v.fuente]) { %>
+          <a href="<%= urls[v.fuente] %>" target="_blank" class="verif-link btn btn-sm btn-outline" onclick="window.open(this.href, '_blank', 'width=1000,height=700'); return false;">
+            Abrir <%= fuenteConfig[v.fuente].titulo %> en nueva ventana
+          </a>
+        <% } %>
+
+        <div class="alert alert-info" style="white-space: pre-line; font-size: 0.85rem;">
+          <strong>Instrucciones:</strong>
+<%= fuenteConfig[v.fuente].instrucciones %>
+        </div>
+
+        <% if (v.observaciones) { %>
+          <div class="alert alert-success" style="margin-top: 0.5rem;">
+            <strong>Observaciones previas:</strong> <%= v.observaciones %>
+            <% if (v.datos_respuesta) { %><br><strong>Datos:</strong> <%= v.datos_respuesta %><% } %>
+            <% if (v.verificado_por) { %><br><small>Por: <%= v.verificado_por %></small><% } %>
+          </div>
+        <% } %>
+
+        <!-- Formulario para registrar resultado -->
+        <form method="POST" action="/beneficiarios/<%= beneficiario.id %>/verificar/<%= v.fuente %>" style="margin-top: 1rem; border-top: 1px solid var(--gray-200); padding-top: 1rem;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Resultado de Verificacion</label>
+              <select name="estado" required>
+                <option value="pendiente" <%= v.estado === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
+                <option value="verificado" <%= v.estado === 'verificado' ? 'selected' : '' %>>Verificado - Datos correctos</option>
+                <option value="no_encontrado" <%= v.estado === 'no_encontrado' ? 'selected' : '' %>>No encontrado en el sistema</option>
+                <option value="inconsistente" <%= v.estado === 'inconsistente' ? 'selected' : '' %>>Inconsistente - Datos no coinciden</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Verificado por</label>
+              <input type="text" name="verificado_por" value="<%= v.verificado_por || '' %>" placeholder="Nombre del operador">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Datos obtenidos de la consulta</label>
+            <textarea name="datos_respuesta" rows="2" placeholder="Ej: Grupo SISBEN: A1, Puntaje: 12.5 / EPS: Nueva EPS, Regimen: Subsidiado"><%= v.datos_respuesta || '' %></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Observaciones</label>
+            <textarea name="observaciones" rows="2" placeholder="Notas adicionales sobre la verificacion..."><%= v.observaciones || '' %></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-success">Guardar Verificacion</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+<% }) %>
+
+<!-- Historial -->
+<div class="card">
+  <h2>Historial de Cambios</h2>
+  <% if (historial.length === 0) { %>
+    <p style="color: var(--gray-500); font-size: 0.9rem;">Sin registros aun.</p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Accion</th><th>Detalle</th><th>Usuario</th></tr>
+      </thead>
+      <tbody>
+        <% historial.forEach(h => { %>
+          <tr>
+            <td><%= h.fecha %></td>
+            <td><span class="badge badge-verificado"><%= h.accion %></span></td>
+            <td><%= h.detalle %></td>
+            <td><%= h.usuario || '-' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include('../layout/footer') %>

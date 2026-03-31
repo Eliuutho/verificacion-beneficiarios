@@ -1,0 +1,70 @@
+<%- include('layout/header') %>
+
+<h2 style="margin-bottom: 1rem;">Dashboard</h2>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-number"><%= total %></div>
+    <div class="stat-label">Total Beneficiarios</div>
+  </div>
+  <div class="stat-card success">
+    <div class="stat-number"><%= verificados %></div>
+    <div class="stat-label">Completamente Verificados</div>
+  </div>
+  <div class="stat-card warning">
+    <div class="stat-number"><%= pendientes %></div>
+    <div class="stat-label">Pendientes de Verificacion</div>
+  </div>
+  <div class="stat-card info">
+    <div class="stat-number"><%= ppt %></div>
+    <div class="stat-label">Con PPT</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Flujo de Verificacion Triple</h2>
+  <div class="alert alert-info">
+    <strong>Logica de verificacion:</strong><br>
+    Documento <span class="badge badge-RC">RC / TI / CC</span> &rarr; Se verifican las 3 fuentes: Registraduria + SISBEN + ADRES<br>
+    Documento <span class="badge badge-PPT">PPT</span> &rarr; Se verifican solo 2 fuentes: SISBEN + ADRES (Registraduria no aplica)
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fuente</th>
+        <th>URL de Consulta</th>
+        <th>Datos Requeridos</th>
+        <th>Aplica para</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Registraduria Nacional</strong></td>
+        <td><a href="https://consultasrc.registraduria.gov.co/ProyectoSCCRC/faces/index.xhtml" target="_blank">consultasrc.registraduria.gov.co</a></td>
+        <td>NUIP / Serial del Registro Civil</td>
+        <td><span class="badge badge-RC">RC</span> <span class="badge badge-TI">TI</span> <span class="badge badge-CC">CC</span></td>
+      </tr>
+      <tr>
+        <td><strong>SISBEN IV</strong></td>
+        <td><a href="https://portal.sisben.gov.co/Paginas/consulta-tu-grupo.html" target="_blank">portal.sisben.gov.co</a></td>
+        <td>Tipo doc + Numero de documento</td>
+        <td><span class="badge badge-RC">RC</span> <span class="badge badge-PPT">PPT</span> (Todos)</td>
+      </tr>
+      <tr>
+        <td><strong>ADRES (EPS)</strong></td>
+        <td><a href="https://www.adres.gov.co/consulte-su-eps" target="_blank">adres.gov.co</a></td>
+        <td>Tipo doc + Numero de documento</td>
+        <td><span class="badge badge-RC">RC</span> <span class="badge badge-PPT">PPT</span> (Todos)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Acciones Rapidas</h2>
+  <a href="/beneficiarios/nuevo" class="btn btn-primary">Registrar Nuevo Beneficiario</a>
+  <a href="/beneficiarios" class="btn btn-outline" style="margin-left: 0.5rem;">Ver Todos los Beneficiarios</a>
+</div>
+
+<%- include('layout/footer') %>

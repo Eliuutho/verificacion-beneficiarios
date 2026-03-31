@@ -1,0 +1,56 @@
+<%- include('../layout/header') %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+  <h2>Beneficiarios</h2>
+  <a href="/beneficiarios/nuevo" class="btn btn-primary">+ Nuevo Registro</a>
+</div>
+
+<div class="card">
+  <form method="GET" action="/beneficiarios" class="search-bar">
+    <input type="text" name="filtro" placeholder="Buscar por documento, nombre o apellido..." value="<%= filtro || '' %>">
+    <button type="submit" class="btn btn-primary">Buscar</button>
+    <% if (filtro) { %>
+      <a href="/beneficiarios" class="btn btn-outline">Limpiar</a>
+    <% } %>
+  </form>
+
+  <% if (beneficiarios.length === 0) { %>
+    <div class="alert alert-info">No se encontraron beneficiarios. <a href="/beneficiarios/nuevo">Registra uno nuevo</a>.</div>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo Doc</th>
+          <th>Numero</th>
+          <th>Nombre Completo</th>
+          <th>Fecha Nac.</th>
+          <th>Verificacion</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% beneficiarios.forEach(b => { %>
+          <tr>
+            <td><span class="badge badge-<%= b.tipo_documento %>"><%= b.tipo_documento %></span></td>
+            <td><%= b.numero_documento %></td>
+            <td><%= b.primer_nombre %> <%= b.segundo_nombre || '' %> <%= b.primer_apellido %> <%= b.segundo_apellido || '' %></td>
+            <td><%= b.fecha_nacimiento || '-' %></td>
+            <td>
+              <% const pct = b.total_verificaciones > 0 ? Math.round((b.verificados / b.total_verificaciones) * 100) : 0; %>
+              <span><%= b.verificados %>/<%= b.total_verificaciones %></span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: <%= pct %>%"></div>
+              </div>
+            </td>
+            <td>
+              <a href="/beneficiarios/<%= b.id %>/verificar" class="btn btn-sm btn-primary">Verificar</a>
+              <a href="/beneficiarios/<%= b.id %>/editar" class="btn btn-sm btn-outline">Editar</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include('../layout/footer') %>

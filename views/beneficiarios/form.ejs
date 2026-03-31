@@ -1,0 +1,88 @@
+<%- include('../layout/header') %>
+
+<h2 style="margin-bottom: 1rem;"><%= beneficiario && beneficiario.id ? 'Editar' : 'Nuevo' %> Beneficiario</h2>
+
+<div class="card">
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="<%= beneficiario && beneficiario.id ? '/beneficiarios/' + beneficiario.id + '/editar' : '/beneficiarios/nuevo' %>">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo de Documento *</label>
+        <select name="tipo_documento" required id="tipoDocSelect">
+          <option value="">Seleccionar...</option>
+          <option value="RC" <%= beneficiario && beneficiario.tipo_documento === 'RC' ? 'selected' : '' %>>RC - Registro Civil</option>
+          <option value="TI" <%= beneficiario && beneficiario.tipo_documento === 'TI' ? 'selected' : '' %>>TI - Tarjeta de Identidad</option>
+          <option value="CC" <%= beneficiario && beneficiario.tipo_documento === 'CC' ? 'selected' : '' %>>CC - Cedula de Ciudadania</option>
+          <option value="PPT" <%= beneficiario && beneficiario.tipo_documento === 'PPT' ? 'selected' : '' %>>PPT - Permiso por Proteccion Temporal</option>
+          <option value="CE" <%= beneficiario && beneficiario.tipo_documento === 'CE' ? 'selected' : '' %>>CE - Cedula de Extranjeria</option>
+          <option value="PA" <%= beneficiario && beneficiario.tipo_documento === 'PA' ? 'selected' : '' %>>PA - Pasaporte</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Numero de Documento *</label>
+        <input type="text" name="numero_documento" required value="<%= beneficiario ? beneficiario.numero_documento || '' : '' %>" placeholder="Ej: 1234567890">
+      </div>
+    </div>
+
+    <div id="pptNotice" class="alert alert-warning" style="display: none;">
+      Documento PPT detectado: La verificacion con Registraduria Nacional <strong>NO aplica</strong>. Solo se verificara con SISBEN y ADRES.
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Primer Nombre *</label>
+        <input type="text" name="primer_nombre" required value="<%= beneficiario ? beneficiario.primer_nombre || '' : '' %>">
+      </div>
+      <div class="form-group">
+        <label>Segundo Nombre</label>
+        <input type="text" name="segundo_nombre" value="<%= beneficiario ? beneficiario.segundo_nombre || '' : '' %>">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Primer Apellido *</label>
+        <input type="text" name="primer_apellido" required value="<%= beneficiario ? beneficiario.primer_apellido || '' : '' %>">
+      </div>
+      <div class="form-group">
+        <label>Segundo Apellido</label>
+        <input type="text" name="segundo_apellido" value="<%= beneficiario ? beneficiario.segundo_apellido || '' : '' %>">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fecha de Nacimiento</label>
+        <input type="date" name="fecha_nacimiento" value="<%= beneficiario ? beneficiario.fecha_nacimiento || '' : '' %>">
+      </div>
+      <div class="form-group">
+        <label>Departamento</label>
+        <input type="text" name="departamento" value="<%= beneficiario ? beneficiario.departamento || '' : '' %>" placeholder="Ej: Cundinamarca">
+      </div>
+      <div class="form-group">
+        <label>Municipio</label>
+        <input type="text" name="municipio" value="<%= beneficiario ? beneficiario.municipio || '' : '' %>" placeholder="Ej: Bogota">
+      </div>
+    </div>
+
+    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+      <button type="submit" class="btn btn-primary"><%= beneficiario && beneficiario.id ? 'Guardar Cambios' : 'Registrar y Verificar' %></button>
+      <a href="/beneficiarios" class="btn btn-outline">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<% if (beneficiario && beneficiario.id) { %>
+  <div class="card" style="border-left: 4px solid var(--danger);">
+    <h2>Zona de Peligro</h2>
+    <form method="POST" action="/beneficiarios/<%= beneficiario.id %>/eliminar" onsubmit="return confirm('Estas seguro de eliminar este beneficiario? Esta accion no se puede deshacer.')">
+      <button type="submit" class="btn btn-danger">Eliminar Beneficiario</button>
+    </form>
+  </div>
+<% } %>
+
+<%- include('../layout/footer') %>
